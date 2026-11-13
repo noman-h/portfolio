@@ -1,2 +1,3 @@
-2026/11/12-19:00:20.512 621c Creating DB D:\Projects\portfolio\.tmp\chrome-video\Default\Service Worker\Database since it was missing.
-2026/11/12-19:00:20.525 621c Reusing MANIFEST D:\Projects\portfolio\.tmp\chrome-video\Default\Service Worker\Database/MANIFEST-000001
+2026/11/13-09:49:01.993 3150 Reusing MANIFEST D:\Projects\portfolio\.tmp\chrome-video\Default\Service Worker\Database/MANIFEST-000001
+2026/11/13-09:49:01.994 3150 Recovering log #3
+2026/11/13-09:49:01.995 3150 Reusing old log D:\Projects\portfolio\.tmp\chrome-video\Default\Service Worker\Database/000003.log 

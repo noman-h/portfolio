@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { LazyMotion, domAnimation, m, useReducedMotion } from 'motion/react'
 import { projects } from './data/projects.js'
 import ProjectCard from './components/ProjectCard.jsx'
+import PortraitParticles from './components/PortraitParticles.jsx'
 import './App.css'
 
 const CosmicShader = lazy(() => import('./three/CosmicShader.jsx'))
@@ -142,37 +143,6 @@ function Hero({ motionOn }) {
     }
   }, [motionOn, reduceMotion])
 
-  useEffect(() => {
-    const stage = stageRef.current
-    const portrait = stage?.querySelector('.portrait-motion')
-    if (!stage || !portrait || !motionOn || reduceMotion) return
-    let frame = 0
-    const update = () => {
-      frame = 0
-      const bounds = stage.getBoundingClientRect()
-      // Measure the stationary stage, so the moving image cannot feed back
-      // into its own scroll progress. Keep it fully visible at the page top.
-      const start = Math.max(0, bounds.top + window.scrollY - window.innerHeight * 0.3)
-      const progress = Math.max(0, Math.min(1, (window.scrollY - start) / Math.max(bounds.height * 0.85, 1)))
-      const eased = progress * progress * (3 - 2 * progress)
-      portrait.style.setProperty('--exit-opacity', (1 - eased).toFixed(3))
-      // Positive travel offsets part of the page scroll: the portrait lingers
-      // behind the content instead of flying upward or shrinking away.
-      portrait.style.setProperty('--exit-rise', `${(progress * Math.min(bounds.height * 0.22, 110)).toFixed(1)}px`)
-    }
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(update) }
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule, { passive: true })
-    update()
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
-      portrait.style.removeProperty('--exit-opacity')
-      portrait.style.removeProperty('--exit-rise')
-    }
-  }, [motionOn, reduceMotion])
-
   return <section className={`hero section-pad${motionOn && !reduceMotion ? ' motion-enabled' : ' motion-disabled'}`} id="home">
     <div className="hero-shader" aria-hidden="true">{shaderReady && <Suspense fallback={null}><CosmicShader /></Suspense>}</div>
     <div className="hero-meta"><span><i className="availability-dot" /> AVAILABLE FOR THE RIGHT OPPORTUNITY</span><span>CHITTORGARH, INDIA · 24°53′N 74°38′E</span></div>
@@ -182,7 +152,7 @@ function Hero({ motionOn }) {
         <h1 className="hero-name">Noman <em>Hassan</em></h1>
         <div className="hero-bottom">
           <p>I’m Noman Hassan. I build thoughtful web products, dependable backend systems, and interfaces that make everyday work feel simpler.</p>
-          <div className="hero-actions"><a className="button button-dark" href="#projects">Explore my work <Arrow /></a><a className="text-link" href="#contact">Get in touch <Arrow diagonal /></a><a className="resume-link" href="/resume-noman%20hassan.pdf" download="Noman-Hassan-Resume.pdf">Download résumé <Arrow diagonal /></a></div>
+          <div className="hero-actions"><a className="button button-dark" href="#projects">View Projects <Arrow /></a><a className="text-link" href="#contact">Get in touch <Arrow diagonal /></a><a className="resume-link" href="/resume-noman%20hassan.pdf" download="Noman-Hassan-Resume.pdf">Download Resume <Arrow diagonal /></a></div>
         </div>
         <div className="hero-socials"><a href="https://github.com/noman-h" target="_blank" rel="noreferrer">GITHUB <Arrow diagonal /></a><a href="https://www.linkedin.com/in/noman-h/" target="_blank" rel="noreferrer">LINKEDIN <Arrow diagonal /></a><a href="https://leetcode.com/u/noman-h/" target="_blank" rel="noreferrer">LEETCODE <Arrow diagonal /></a></div>
       </div>
@@ -190,7 +160,7 @@ function Hero({ motionOn }) {
         <span className="portrait-outline" aria-hidden="true">FULL-STACK DEVELOPER</span>
         <span className="portrait-orbit portrait-orbit-one" aria-hidden="true" /><span className="portrait-orbit portrait-orbit-two" aria-hidden="true" />
         <div className="portrait-index"><span>FIG. 01</span><span>THE PERSON BEHIND THE PIXELS</span></div>
-        <div className="portrait-frame portrait-cutout"><div className="portrait-motion"><div className="portrait-wipe"><picture><source type="image/avif" srcSet="/images/noman-cutout-640.avif 640w, /images/noman-cutout-1024.avif 1024w" sizes="(max-width: 760px) 88vw, 420px" /><img src="/images/noman-cutout-1024.webp" srcSet="/images/noman-cutout-640.webp 640w, /images/noman-cutout-1024.webp 1024w" sizes="(max-width: 760px) 88vw, 420px" alt="Black-and-white cutout portrait of Noman Hassan" width="1024" height="1035" fetchPriority="high" decoding="async" /></picture></div></div><span className="portrait-scanline" aria-hidden="true" /></div>
+        <div className="portrait-frame portrait-cutout"><div className="portrait-scroll"><div className="portrait-motion"><div className="portrait-wipe"><PortraitParticles motionOn={motionOn} reduceMotion={reduceMotion} /></div></div></div><span className="portrait-scanline" aria-hidden="true" /></div>
         <div className="portrait-hud" aria-hidden="true"><span>FIG. 01 / SIGNAL</span><span>24°53′N · 74°38′E</span></div>
         <div className="portrait-caption"><span>NOMAN HASSAN</span><span>DEVELOPER · PROBLEM SOLVER</span></div>
         <div className="portrait-stamp" aria-hidden="true"><span>CODE WITH<br />PURPOSE</span><b>✳</b></div>
@@ -269,33 +239,6 @@ function Contact() {
 function App() {
   const reduceMotion = useReducedMotion()
   const [motionOn, setMotionOn] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  useEffect(() => {
-    if (!motionOn || reduceMotion) return
-    const blocks = document.querySelectorAll('.hero-meta, .hero-copy, .hero-footer, main > section:not(.hero) > .section-label, .chapter-intro, .about-layout > *, .journey-stop, .about-bottom, .experience-heading > *, .role-card, .projects-heading > *, .project-card, .projects-outro, .skills-heading > *, .skill-group, .skills-marquee, .profiles-layout > *, .contact-layout > *, .site-footer')
-    const previousProgress = new WeakMap()
-    let frame = 0
-    const update = () => {
-      frame = 0
-      const fadeDistance = Math.max(window.innerHeight * 0.45, 1)
-      blocks.forEach((block, index) => {
-        const bottom = block.getBoundingClientRect().bottom + (previousProgress.get(block) || 0) * 45
-        const progress = window.scrollY < 2 ? 0 : 1 - Math.max(0, Math.min(1, bottom / fadeDistance))
-        previousProgress.set(block, progress)
-        block.style.opacity = String(1 - progress)
-        block.style.translate = `${(index % 2 ? 1 : -1) * progress * 70}px ${-progress * 45}px`
-      })
-    }
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(update) }
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule, { passive: true })
-    update()
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
-      blocks.forEach((block) => { block.style.removeProperty('opacity'); block.style.removeProperty('translate') })
-    }
-  }, [motionOn, reduceMotion])
   useEffect(() => {
     const compactViewport = window.matchMedia('(max-width: 760px)').matches
     if (reduceMotion || compactViewport || !motionOn) return

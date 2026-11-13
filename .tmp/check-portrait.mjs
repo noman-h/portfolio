@@ -9,6 +9,8 @@ try {
   await new Promise(r=>socket.addEventListener('open',r,{once:true}))
   let id=0;const pending=new Map()
   socket.addEventListener('message',e=>{const m=JSON.parse(e.data);if(pending.has(m.id)){pending.get(m.id)(m);pending.delete(m.id)}})
+  let exceptions=0
+  socket.addEventListener('message',e=>{if(JSON.parse(e.data).method==='Runtime.exceptionThrown')exceptions++})
   const call=(method,params={})=>new Promise(r=>{pending.set(++id,r);socket.send(JSON.stringify({id,method,params}))})
   const evaluate=async(expression)=>{const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.result.exceptionDetails)throw Error(JSON.stringify(r.result.exceptionDetails));return r.result.result.value}
   await call('Emulation.setDeviceMetricsOverride',{width:Number(process.argv[3]) || 1440,height:900,deviceScaleFactor:1,mobile:false})
@@ -25,6 +27,20 @@ try {
       console.log(await evaluate('(()=>{document.querySelector(".menu-toggle").click();return "opened menu"})()'))
       await new Promise(r=>setTimeout(r,300))
       console.log(await evaluate('JSON.stringify({menuExpanded:document.querySelector(".menu-toggle").getAttribute("aria-expanded"),navDisplay:getComputedStyle(document.querySelector(".nav-links")).display})'))
+    }
+    if(process.argv[4] === 'scroll') {
+      for(const y of [0,250,500,750,1000]) {
+        await evaluate(`window.scrollTo({top:${y},behavior:'instant'})`)
+        await new Promise(r=>setTimeout(r,600))
+        const shot=await call('Page.captureScreenshot',{format:'png'})
+        await writeFile(`.tmp/scroll-${y}.png`,Buffer.from(shot.result.data,'base64'))
+        console.log(y,await evaluate('JSON.stringify({opacity:getComputedStyle(document.querySelector(".portrait-scroll")).opacity,transform:getComputedStyle(document.querySelector(".portrait-scroll")).transform,imageComplete:document.querySelector(".portrait-motion img").complete})'))
+      }
+      await evaluate('window.scrollTo({top:0,behavior:"instant"})')
+      await new Promise(r=>setTimeout(r,800))
+      console.log('reverse',await evaluate('JSON.stringify({opacity:getComputedStyle(document.querySelector(".portrait-scroll")).opacity,transform:getComputedStyle(document.querySelector(".portrait-scroll")).transform})'))
+      console.log('portraitTriggers',await evaluate('(async()=>{const u=performance.getEntriesByType("resource").find(x=>x.name.includes("ScrollTrigger-")).name;const m=await import(u);return m.ScrollTrigger.getAll().filter(t=>t.vars.id==="hero-portrait").length})()'))
+      console.log('uncaughtExceptions',exceptions)
     }
   } else {
   for(const y of [0,300,600,0]) {
