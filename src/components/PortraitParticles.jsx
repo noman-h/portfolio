@@ -143,9 +143,9 @@ export default function PortraitParticles({ motionOn, reduceMotion }) {
     const canvas = canvasRef.current
     if (!root || !image || !canvas || !motionOn || reduceMotion) return
 
-    const constrainedDevice = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)
+    const compactDevice = window.matchMedia('(max-width: 800px), (pointer: coarse)').matches
+      || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)
       || (navigator.deviceMemory && navigator.deviceMemory <= 2)
-    if (constrainedDevice || window.matchMedia('(max-width: 800px)').matches) return
 
     let disposed = false
     let idleId
@@ -172,7 +172,7 @@ export default function PortraitParticles({ motionOn, reduceMotion }) {
       root.style.setProperty('--portrait-base-opacity', String(0.1 + remainingPortrait * 0.48))
       const width = Math.max(1, root.clientWidth)
       const height = Math.max(1, root.clientHeight)
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5)
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, compactDevice ? 1 : 1.5)
       const renderWidth = Math.round(width * pixelRatio)
       const renderHeight = Math.round(height * pixelRatio)
       if (canvas.width !== renderWidth || canvas.height !== renderHeight) {
@@ -207,7 +207,7 @@ export default function PortraitParticles({ motionOn, reduceMotion }) {
         if (!gl) return
 
         program = createProgram(gl)
-        const particles = samplePortrait(image, false)
+        const particles = samplePortrait(image, compactDevice)
         count = particles.count
         portraitAspect = particles.aspect
         root.dataset.particleCount = String(count)

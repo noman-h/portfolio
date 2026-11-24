@@ -463,5 +463,5 @@ html,body,#root{max-width:100%;overflow-x:clip}
 .portrait-particles__canvas{position:absolute;inset:0;z-index:2;display:block;width:100%;height:100%;opacity:0;pointer-events:none;transition:opacity .18s linear}
 .portrait-particles.is-particle-ready picture{opacity:var(--portrait-base-opacity,.58)}
 .portrait-particles.is-particle-ready .portrait-particles__canvas{opacity:1}
-@media(max-width:800px),(pointer:coarse),(prefers-reduced-motion:reduce){.portrait-particles picture{opacity:1!important}.portrait-particles__canvas{display:none}}
+@media(prefers-reduced-motion:reduce){.portrait-particles picture{opacity:1!important}.portrait-particles__canvas{display:none}}
 @media(prefers-reduced-motion:reduce){.hero .hero-actions,.hero .hero-socials{animation:none}}

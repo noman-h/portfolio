@@ -240,8 +240,7 @@ function App() {
   const reduceMotion = useReducedMotion()
   const [motionOn, setMotionOn] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   useEffect(() => {
-    const compactViewport = window.matchMedia('(max-width: 760px)').matches
-    if (reduceMotion || compactViewport || !motionOn) return
+    if (reduceMotion || !motionOn) return
     let alive = true
     let cleanup = () => {}
     let idleId
