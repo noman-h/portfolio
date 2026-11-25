@@ -3,6 +3,7 @@ import { LazyMotion, domAnimation, m, useReducedMotion } from 'motion/react'
 import { projects } from './data/projects.js'
 import ProjectCard from './components/ProjectCard.jsx'
 import PortraitParticles from './components/PortraitParticles.jsx'
+import SeasonalWeather from './components/SeasonalWeather.jsx'
 import './App.css'
 
 const CosmicShader = lazy(() => import('./three/CosmicShader.jsx'))
@@ -304,7 +305,7 @@ function App() {
     }
   }, [motionOn, reduceMotion])
   const effectiveMotion = motionOn && !reduceMotion
-  return <LazyMotion features={domAnimation}><WaterRipple motionOn={effectiveMotion} /><Navigation motionOn={motionOn} onMotionToggle={() => setMotionOn((value) => !value)} /><main><Hero motionOn={effectiveMotion} /><About motionOn={effectiveMotion} /><Experience /><Projects /><Skills /><CodingProfiles /><Contact /></main></LazyMotion>
+  return <LazyMotion features={domAnimation}><SeasonalWeather motionOn={effectiveMotion} /><WaterRipple motionOn={effectiveMotion} /><Navigation motionOn={motionOn} onMotionToggle={() => setMotionOn((value) => !value)} /><main><Hero motionOn={effectiveMotion} /><About motionOn={effectiveMotion} /><Experience /><Projects /><Skills /><CodingProfiles /><Contact /></main></LazyMotion>
 }
 
 export default App

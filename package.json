@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@elementalfx/weather": "^0.1.0",
     "@react-three/fiber": "^9.8.2",
     "gsap": "^3.15.1",
     "locomotive-scroll": "^5.0.1",
